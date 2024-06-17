@@ -104,3 +104,181 @@ const filmy = [
 		premiera: '2022-12-24',
 	},
 ]
+
+//Informácie o filme
+const hash = window.location.hash.slice(1); 
+let selectMovie = null;
+for (let i = 0; i < filmy.length; i++) {
+    if (filmy[i].id === hash) {
+        selectMovie = filmy[i];
+        break;  
+    }
+}
+
+if (selectMovie) {
+    console.log('Nalezený film:', selectMovie);
+}
+if (selectMovie) {
+    const detailElement = document.querySelector('#detail-filmu');
+    detailElement.querySelector('img').src = selectMovie.plakat.url;
+    detailElement.querySelector('img').alt = `Plakát filmu ${selectMovie.nazev}`;
+    detailElement.querySelector('.card-title').textContent = selectMovie.nazev;
+    detailElement.querySelector('.card-text').textContent = selectMovie.popis;
+} else {
+    console.log('Film s daným ID nebyl nalezen.');
+}
+
+//Pridanie dátumu premiéry
+const premiereElement = document.getElementById('premiera');
+const formattedDate = dayjs('2022-12-24').format('D. M. YYYY');
+premiereElement.innerHTML = `Premiéra: <strong>${formattedDate}</strong>`;
+
+const todayDate = dayjs();
+const dayOfPremiere = dayjs('2022-12-24'); 
+
+const daysToPremiere = dayOfPremiere.diff(todayDate, 'days');
+
+let dayText = '';
+if (daysToPremiere === 0) {
+    dayText = 'dnes';
+} else if (daysToPremiere === 1) {
+    dayText = 'za 1 den';
+} else if (daysToPremiere > 1) {
+    dayText = `za ${daysToPremiere} dní`;
+} else if (daysToPremiere === -1) {
+    dayText = 'před 1 dnem';
+} else if (daysToPremiere < -1) {
+    dayText = `před ${Math.abs(daysToPremiere)} dny`;
+}
+
+const premiereElm = document.getElementById('premiera');
+premiereElm.textContent += ` (${dayText})`;
+
+//Hviezdičky
+const highlightStars = (rating) => {
+    
+    const stars = document.querySelectorAll('.fa-star');
+
+    stars.forEach((star, index) => {
+        if (index < rating) {
+            star.classList.remove('far');
+            star.classList.add('fas');
+        } else {
+           	star.classList.remove('fas');
+            star.classList.add('far');
+        }
+    });
+}
+
+let lastRating = 0;
+
+const stars = document.querySelectorAll('.fa-star');
+stars.forEach((star, index) => {
+    star.addEventListener('click', () => {
+        lastRating = parseInt(star.textContent.trim());
+        highlightStars(lastRating);
+    });
+
+    star.addEventListener('mouseenter', () => {
+        const order = parseInt(star.textContent.trim());
+        highlightStars(order);
+    });
+
+    star.addEventListener('mouseleave', () => {
+        highlightStars(lastRating);
+    });
+});
+
+//Formulár
+const noteForm = document.querySelector('#note-form');
+
+noteForm.addEventListener('submit', (event) => {
+    event.preventDefault();
+
+    const messageInput = document.querySelector('#message-input');
+	const termsCheckbox = document.querySelector('#terms-checkbox');
+
+	let isValid = true;
+
+    if (messageInput.value.trim() === '') {
+        messageInput.classList.add('is-invalid');
+		messageInput.focus();
+    } else {
+        messageInput.classList.remove('is-invalid');
+    }
+
+	if (!termsCheckbox.checked) {
+        termsCheckbox.classList.add('is-invalid');
+        isValid = false;
+		termsCheckbox.focus();
+    } else {
+        termsCheckbox.classList.remove('is-invalid');
+    }
+
+	if (isValid) {
+        const messageText = messageInput.value.trim();
+
+        noteForm.innerHTML = `<p class="card-text">${messageText}</p>`;
+    }
+});
+
+//Prehrávanie videa
+const player = document.getElementById('prehravac');
+
+if (player) {
+    const video = player.querySelector('video');
+    const playButton = player.querySelector('.play');
+
+    playButton.addEventListener('click', () => {
+        video.play();
+    });
+
+    video.addEventListener('playing', () => {
+        player.classList.add('playing');
+    });
+
+    const pauseButton = player.querySelector('.pause');
+
+    pauseButton.addEventListener('click', () => {
+        video.pause();
+    });
+
+    video.addEventListener('pause', () => {
+        player.classList.remove('playing');
+    });
+
+	const currentTimeDisplay = player.querySelector('.current-time');
+
+    video.addEventListener('timeupdate', () => {
+        const currentTime = video.currentTime;
+
+        const minutes = Math.floor(currentTime / 60);
+        const seconds = Math.floor(currentTime % 60);
+
+        const formattedTime = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+
+        currentTimeDisplay.textContent = formattedTime;
+	});
+
+	document.addEventListener('keydown', (event) => {
+        if (
+            event.code === 'Space' &&
+            event.target.tagName !== 'TEXTAREA' &&
+            event.target.tagName !== 'INPUT' &&
+            event.target.tagName !== 'BUTTON'
+        ) {
+            if (video.paused) {
+                video.play();
+            } else {
+                video.pause();
+            }
+        }
+    });
+}
+
+
+
+
+
+
+
